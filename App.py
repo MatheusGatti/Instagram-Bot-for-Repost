@@ -1,5 +1,6 @@
 from multiprocessing.spawn import _main
 from instagrapi import Client
+from instagrapi.types import StoryMedia
 import time
 import json
 import os
@@ -101,9 +102,27 @@ def postarMedia(cl: Client, mediaTipo, mediaPath, mediaLegenda):
         pass
 
 
+def postarStory(media_pk, mediaPath):
+    cl.video_upload_to_story(mediaPath,
+                             medias=[StoryMedia(media_pk=media_pk)])
+
+
 if __name__ == '__main__':
     # API https://github.com/adw0rd/instagrapi
     # API https://adw0rd.github.io/instagrapi/usage-guide/interactions.html
+
+    # Perguntar se deseja repostar as publicações no story
+    chavePostarStory = None
+    while chavePostarStory != True and chavePostarStory != False:
+        chavePostarStory = input(
+            'Deseja repostar as publicações no story (S para Sim e N para Não)? ')
+        if chavePostarStory.upper() == "S" or chavePostarStory.upper() == "Sim":
+            chavePostarStory = True
+            break
+        elif chavePostarStory.upper() == "N" or chavePostarStory.upper() == "Não" or chavePostarStory.upper() == "Nao":
+            chavePostarStory = False
+            break
+
     # Entrar na conta do Instagram
     cl = Client()
     cl.login('seu usuário no instagram', 'sua senha')
@@ -176,6 +195,11 @@ if __name__ == '__main__':
             cadastrarPostagem(objPostagem.pk)
 
             print('Postagem cadastrada no banco de dados...')
+
+            # Checar se é para postar no story
+            if chavePostarStory == True:
+                postarStory(media_pk=mediaPostada.pk, mediaPath=mediaPath)
+                print('Repostado no story com sucesso...')
 
             # Apagar pasta temporária de mídias
             apagarMediaTemp()
